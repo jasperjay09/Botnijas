@@ -3,7 +3,7 @@ const axios = require("axios");
 module.exports = {
   config: {
     name: "spotify",
-    version: "2.0.0",
+    version: "1.0.0",
     author: "April Manalo",
     role: 0,
     category: "music",
@@ -11,37 +11,37 @@ module.exports = {
   },
 
   onStart: async function ({ api, event, args }) {
+    const { threadID, messageID, senderID } = event;
     const query = args.join(" ").trim();
+
     if (!query) {
       return api.sendMessage(
         "⚠️ Usage: spotify <song name>",
-        event.threadID,
-        event.messageID
+        threadID,
+        messageID
       );
     }
 
-    let searchMsg;
-    try {
-      searchMsg = await api.sendMessage(
-        "🔎 Searching Spotify...",
-        event.threadID,
-        event.messageID
-      );
+    // ✅ SAFETY INIT (ROOT FIX)
+    if (!global.client.handleReply) {
+      global.client.handleReply = [];
+    }
 
-      // 🔥 SEARCH API
+    try {
+      await api.sendMessage("🔎 Searching Spotify...", threadID, messageID);
+
       const res = await axios.get(
         "https://norch-project.gleeze.com/api/spotify",
-        {
-          params: { query },
-          timeout: 15000
-        }
+        { params: { q: query }, timeout: 15000 }
       );
 
-      if (!res.data || !Array.isArray(res.data.results) || res.data.results.length === 0) {
-        return api.sendMessage("❌ No results found.", event.threadID);
-      }
+      const songs = Array.isArray(res.data?.results)
+        ? res.data.results.slice(0, 5)
+        : [];
 
-      const songs = res.data.results.slice(0, 5);
+      if (songs.length === 0) {
+        return api.sendMessage("❌ No results found.", threadID, messageID);
+      }
 
       let msg = "🎧 Spotify Results:\n\n";
       songs.forEach((s, i) => {
@@ -49,71 +49,89 @@ module.exports = {
       });
       msg += "👉 Reply with number (1–5)";
 
-      const listMsg = await api.sendMessage(msg, event.threadID);
+      const sent = await api.sendMessage(msg, threadID);
 
-      // ❗ REGISTER REPLY (MAP, NOT PUSH)
-      global.GoatBot.onReply.set(listMsg.messageID, {
-        commandName: this.config.name,
-        author: event.senderID,
+      // ✅ REGISTER HANDLE REPLY (FIXED)
+      global.client.handleReply.push({
+        name: module.exports.config.name,
+        messageID: sent.messageID,
+        author: senderID,
         songs
       });
 
     } catch (err) {
-      console.error("[SPOTIFY SEARCH ERROR]", err);
-      return api.sendMessage("❌ Failed to search Spotify.", event.threadID);
+      console.error("[SPOTIFY SEARCH ERROR]", err.message);
+      return api.sendMessage(
+        "❌ Failed to search Spotify.",
+        threadID,
+        messageID
+      );
     }
   },
 
-  onReply: async function ({ api, event, Reply }) {
-    if (event.senderID !== Reply.author) return;
+  onReply: async function ({ api, event, handleReply }) {
+    const { threadID, messageID, senderID, body } = event;
 
-    const choice = parseInt(event.body);
-    if (isNaN(choice) || choice < 1 || choice > Reply.songs.length) {
-      return api.sendMessage("❌ Invalid choice (1–5 only).", event.threadID);
+    if (senderID !== handleReply.author) return;
+
+    const index = parseInt(body);
+    if (isNaN(index) || index < 1 || index > handleReply.songs.length) {
+      return api.sendMessage(
+        "❌ Invalid choice number.",
+        threadID,
+        messageID
+      );
     }
 
-    const song = Reply.songs[choice - 1];
+    const song = handleReply.songs[index - 1];
 
     try {
-      // 🧹 UNSEND CHOICES
-      if (event.messageReply?.messageID) {
-        api.unsendMessage(event.messageReply.messageID);
-      }
+      // ✅ UNSEND CHOICES (IMPORTANT UX FIX)
+      await api.unsendMessage(handleReply.messageID);
 
-      const loadingMsg = await api.sendMessage(
-        `⏳ Downloading...\n\n🎵 ${song.title}\n👤 ${song.artist}`,
-        event.threadID
+      await api.sendMessage(
+        `⬇️ Downloading:\n🎵 ${song.title}\n👤 ${song.artist}`,
+        threadID
       );
 
-      // 🔥 DOWNLOAD API
+      // ✅ CALL DOWNLOADER API (CORRECT STRUCTURE)
       const dl = await axios.get(
-        "https://norch-project.gleeze.com/api/spotifydl",
+        "https://norch-project.gleeze.com/api/spotify-dl-v2",
         {
-          params: { url: song.url },
-          timeout: 30000
+          params: { url: song.spotify_url },
+          timeout: 20000
         }
       );
 
-      if (!dl.data || !dl.data.downloadUrl) {
-        throw new Error("Invalid download response");
+      const data = dl.data;
+
+      if (!data?.success || !data.trackData?.length) {
+        throw new Error("Downloader failed");
       }
+
+      const track = data.trackData[0];
 
       await api.sendMessage(
         {
-          body: `🎶 ${song.title} - ${song.artist}`,
-          attachment: await global.utils.getStreamFromURL(dl.data.downloadUrl)
+          body: `✅ Downloaded:\n🎵 ${track.name}\n👤 ${track.artists}`,
+          attachment: await global.utils.getStreamFromURL(track.download_url)
         },
-        event.threadID
+        threadID
       );
 
-      api.unsendMessage(loadingMsg.messageID);
+      // ✅ CLEAN HANDLE REPLY
+      global.client.handleReply =
+        global.client.handleReply.filter(
+          r => r.messageID !== handleReply.messageID
+        );
 
     } catch (err) {
-      console.error("[SPOTIFY DOWNLOAD ERROR]", err);
-      api.sendMessage("❌ Failed to download track.", event.threadID);
-    } finally {
-      // 🧼 CLEAN REPLY
-      global.GoatBot.onReply.delete(event.messageReply.messageID);
+      console.error("[SPOTIFY DL ERROR]", err.message);
+      return api.sendMessage(
+        "❌ Failed to download song.",
+        threadID,
+        messageID
+      );
     }
   }
 };
