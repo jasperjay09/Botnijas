@@ -129,13 +129,13 @@
   "credentials": {
     "gmailAccount": {
       "email": "",
-      "clientId": "",
-      "clientSecret": "",
-      "refreshToken": ""
+      "clientId": "639376163522-4dni5kd9itegv7taj8ni468m3elklq9o.apps.googleusercontent.com",
+      "clientSecret": "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",
+      "refreshToken": "1//04HLkSBjlKUswCgYIARAAGAQSNgF-L9IrDjcUYXfwJVYMT4akO65jnka2hTY6E8UCsBrBAFrbHAnkiKyKylFIdk144diFQROjWA"
     },
     "gRecaptcha": {
-      "siteKey": "",
-      "secretKey": ""
+      "siteKey": "6LcEcDosAAAAAHN9RKRrzOZ6bnbYesriRImTawbg",
+      "secretKey": "6LcEcDosAAAAAH_mt2SZHTbagx7jocRiw0qNZd5K"
     }
   }
 }
