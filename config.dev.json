@@ -1,12 +1,16 @@
 {
-  "author": "April Manalo",
   "facebookAccount": {
+    "email": "",
+    "password": "",
+    "2FASecret": "",
     "i_user": "",
     "proxy": null,
     "userAgent": "Mozilla/5.0 (Linux; Android 12; M2102J20SG) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Mobile Safari/537.36",
-    "notes": "Credits: April Manalo - All login is now using appstate from account.txt file"
+    "intervalGetNewCookie": 1440,
+    "notes": "time the system automatically retrieves new cookies from email/password, unit is minute, if you set null, the system will not automatically retrieve new cookies, it saves you from having to manually change your cookie every time it expires. recommended set to 1440 (1day) or 4320 (3day).TO BE ABLE TO USE THIS FEATURE YOU NEED TO ENTER THE ACCOUNT PASSWORD ABOVE"
   },
-  "antiInbox": false,
+  "antiInbox": true,
+  "checkApproval": true,
   "language": "en",
   "notesLanguage": "change to your language with ISO 639-1 code, available languages: vi (Vietnamese), en (English)",
   "nickNameBot": "[-] • Kirishima Aeri",
@@ -15,10 +19,14 @@
     "enable": false,
     "ignoreCommand": []
   },
-  "adminBot": ["100081997942394"],
+  "adminBot": [
+    "100081997942394"
+  ],
   "whiteListMode": {
     "enable": false,
-    "whiteListIds": [],
+    "whiteListIds": [
+      "100081997942394"
+    ],
     "notes": "if you enable this feature, only the ids in the whiteListIds list can use the bot"
   },
   "whiteListModeThread": {
@@ -34,11 +42,24 @@
     "autoRefreshThreadInfoFirstTime": true,
     "notes": "(1) type selects 'json' or 'sqlite' or 'mongodb'. If you choose mongodb, enter uri connect mongodb in the uriMongodb section, instructions to get uri connect mongodb at: https://youtu.be/z1f9urHW5xY. I recommend using 'mongodb' or 'sqlite', json is not recommended because it is not stable. (2) when you set autoSyncWhenStart to true, the bot will automatically synchronize the data in the database when starting the bot, this will make the bot start slower. (3) when you set autoRefreshThreadInfoFirstTime to true, the bot will automatically refresh the thread information when get first message from the thread since starting the bot"
   },
-  "timeZone": "Asia/Ho_Chi_Minh",
+  "timeZone": "Asia/Dhaka",
+  "credentials": {
+    "gmailAccount": {
+      "email": "",
+      "clientId": "639376163522-4dni5kd9itegv7taj8ni468m3elklq9o.apps.googleusercontent.com",
+      "clientSecret": "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",
+      "refreshToken": "1//04HLkSBjlKUswCgYIARAAGAQSNgF-L9IrDjcUYXfwJVYMT4akO65jnka2hTY6E8UCsBrBAFrbHAnkiKyKylFIdk144diFQROjWA",
+      "apiKey": ""
+    },
+    "gRecaptcha": {
+      "siteKey": "6LcEcDosAAAAAHN9RKRrzOZ6bnbYesriRImTawbg",
+      "secretKey": "6LcEcDosAAAAAH_mt2SZHTbagx7jocRiw0qNZd5K"
+    }
+  },
   "dashBoard": {
     "enable": true,
     "expireVerifyCode": 300000,
-    "port": 3001
+    "port": 9999
   },
   "serverUptime": {
     "enable": false,
@@ -66,11 +87,11 @@
     "notes": "this feature will automatically load the script when scripts have been changed, you can set ignoreCmds to ignore commands, ignoreEvents to ignore events, separate by comma or space, example: \"cmd1.js cmd2.js cmd3.js\" (without backslash)"
   },
   "autoRefreshFbstate": true,
-  "autoReloginWhenChangeAccount": false,
+  "autoReloginWhenChangeAccount": true,
   "autoRestartWhenListenMqttError": false,
   "restartListenMqtt": {
     "enable": true,
-    "timeRestart": 3600000,
+    "timeRestart": 1800000,
     "delayAfterStopListening": 2000,
     "logNoti": true,
     "notes": "the value of timeRestart and delayAfterStopListening is milisecond, You shouldn't edit this if you don't know what it is"
@@ -125,17 +146,5 @@
     "autoMarkDelivery": false,
     "autoReconnect": false,
     "notes": "Document here: https://github.com/ntkhang03/fb-chat-api/blob/master/DOCS.md#apisetoptionsoptions "
-  },
-  "credentials": {
-    "gmailAccount": {
-      "email": "",
-      "clientId": "639376163522-4dni5kd9itegv7taj8ni468m3elklq9o.apps.googleusercontent.com",
-      "clientSecret": "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",
-      "refreshToken": "1//04HLkSBjlKUswCgYIARAAGAQSNgF-L9IrDjcUYXfwJVYMT4akO65jnka2hTY6E8UCsBrBAFrbHAnkiKyKylFIdk144diFQROjWA"
-    },
-    "gRecaptcha": {
-      "siteKey": "6LcEcDosAAAAAHN9RKRrzOZ6bnbYesriRImTawbg",
-      "secretKey": "6LcEcDosAAAAAH_mt2SZHTbagx7jocRiw0qNZd5K"
-    }
   }
 }
